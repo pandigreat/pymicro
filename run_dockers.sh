@@ -3,6 +3,8 @@ echo "starting zookeeper"
 zookeeper=`docker run -d --name=zookeeper rshriram/zookeeper:3.4.6`
 sleep 5
 zooip=`docker inspect ${zookeeper}|grep -iw IPAddress|tr -d ' ",'|cut -d ':' -f2`
+echo "zooip is that ${zooip}"
+
 zoostr="${zooip}:2181"
 
 docker run -d --name=view -e ZOOKEEPER=${zoostr} -e SERVICE_NAME=view -p 9180:9080 rshriram/pymicro

@@ -28,6 +28,8 @@ With Docker
 The run_dockers.sh script is a good starting point to setup the entire environment. The script starts the microservices by specifying their service names and zookeeper location.
 The names of services can be found in service_dict in the server.py file
 
+`./run_docker.sh`
+
 `docker run -d --name=view -e ZOOKEEPER=172.16.0.1:2181 -e SERVICE_NAME=view -p 9997:9080 rshriram/pymicro`
 
 Only the view and auth services need their ports 9080 to be publicly exposed.
@@ -35,3 +37,34 @@ Only the view and auth services need their ports 9080 to be publicly exposed.
 **Testing**
 
 `curl -o - http://127.0.0.1:9080/bottle/all/view`
+
+Tips
+----
+**Show containers **
+if you want to display the containers that have been run, use the command
+`docker ps -a`
+or just list the IDs of them
+`docker ps -q` 
+
+**Start Stop Remove Kill Containers**
+Just show the case how to start a containers
+`docker start(stop, kill, rm ) <container or ID>`
+And plus `-f` to do it forcely
+
+**Operations on Images**
+Check out the all the images you have
+`docker images`
+
+Remvoe the images
+`docker rmi $(docker images|grep none| awk '{print $3}'`
+
+** Logs of containers**
+Check the log of containers 
+`docker logs -f <container of ID>`
+
+** Build your images**
+
+`docker build -t <image name> <Dockerfile path>`
+
+**Build and Run Containers**
+
