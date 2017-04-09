@@ -32,13 +32,12 @@ The names of services can be found in service_dict in the server.py file
 
 `./run_docker.sh`
 
-`docker run -d --name=view -e ZOOKEEPER=172.16.0.1:2181 -e SERVICE_NAME=view -p 9997:9080 rshriram/pymicro`
 
 Only the view and auth services need their ports 9080 to be publicly exposed.
 
 **Testing**
 
-`curl -o - http://127.0.0.1:9080/bottle/all/view`
+`curl -o - http://<Machine_IP>:9180/bottle/all/view`
 
 Tips
 ----
