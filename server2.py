@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import simplejson as json
 import urllib
-import urllib2
 import bottle # Web server
 from urllib import urlopen
 from bottle import run, route, request, template
@@ -19,10 +18,6 @@ sd = None
 culprit = False
 my_instance_id = None
 myname = None
-
-bad = 0
-badlv = 0.6
-
 ##schema for microservice
 ##{name : service_name
 ##path : node_path_in_zookeeper (and also the URL sub path)
@@ -71,51 +66,46 @@ serviceA1 = {
 serviceA2 = {
     "name" : "serviceA2",
     "path" : "/bottle/all/view/serviceA/serviceA2",
-    #"children" : [serviceDB2]
     "children" : [serviceDB2]
 }
 serviceA3 = {
     "name" : "serviceA3",
     "path" : "/bottle/all/view/serviceA/serviceA3",
-    "children" : []
+    "children" : [serviceDB3]
 }
 
 ############serviceB's children####################
 serviceB1 = {
     "name" : "serviceB1",
     "path" : "/bottle/all/view/serviceB/serviceB1",
-    "children" : []
+    "children" : [serviceDB1]
 }
 serviceB2 = {
     "name" : "serviceB2",
     "path" : "/bottle/all/view/serviceB/serviceB2",
-    #"children" : [serviceDB2]
-    "children" : [] 
+    "children" : [serviceDB2]
 }
 serviceB3 = {
     "name" : "serviceB3",
     "path" : "/bottle/all/view/serviceB/serviceB3",
     "children" : [serviceDB3]
-    #"children" : [serviceDB3]
 }
 
 ###########serviceC's children#####################
 serviceC1 = {
     "name" : "serviceC1",
     "path" : "/bottle/all/view/serviceC/serviceC1",
-    #"children" : [serviceDB1]
-    "children" : [serviceDB2]
+    "children" : [serviceDB1]
 }
 serviceC2 = {
     "name" : "serviceC2",
-    "path" : "/bottle/all/view/serviceC/serviceC2", 
-    "children" : []
+    "path" : "/bottle/all/view/serviceC/serviceC2",
+    "children" : [serviceDB2]
 }
 serviceC3 = {
     "name" : "serviceC3",
     "path" : "/bottle/all/view/serviceC/serviceC3",
-    #"children" : [serviceDB3]
-    "children" : [serviceDB2]
+    "children" : [serviceDB3]
 }
 
 ###########serviceD's children#####################
@@ -222,8 +212,10 @@ def index():
     <head>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     </head>
@@ -242,47 +234,24 @@ def index():
     return top+middle+bottom
 
 def raw_service_output(snode, nodescend=False):
-    global bad, badlv
-###############################################
-    if snode['name'] == "serviceDB2":
-        a = random.random()
-        print (a)
-        if (a < badlv):
-            bad = 1
-        else :
-            bad = 0
-            time.sleep(5)
-            _output.append({'name':'serviceDB2', 'message': "bad node", 't': -1})
-            return _output
-#############################################
     _output = []
-    
+	#ti = datetime.datetime.now()
     if nodescend == True or (len(snode['children']) == 0):
-        t = time.time()
-        time.sleep(0.0001)
-        t1 = time.time()
-        _output.append({'name': snode['name'], 'message': "Hello World!", 't' :str(t1 - t)})
-        return json.dumps(_output)
-
+        #_output.append({'name': snode['name'], 'message': "Hello World!", 't': ti})
+        _output.append({'name': snode['name'], 'message': "Hello World!"})
+		return json.dumps(_output)
 
     for s in snode["children"]:
-        t = time.time()
-        time.sleep(0.0001)
         name = s['name']
-       
         try:
             inst = sd.get_instance(s['name'])
             url = inst+s['path']
-            res = json.loads(urllib2.urlopen(url, timeout = 5).read())
-            t2 = time.time()
-            _output.append({'name': name, 'message': res, 't': t2 - t})
+            res = json.loads(urlopen(url).read())
         except Exception as e:
-        
             res = str(e)
-            _output.append({'name':name, 'message':"bad " +  res, 't': -1})
-       
-    #if len(_output) == 0:
-    #   _output.append({'name' : snode['name'], 'message': "Error:All child services are inaccessible!", 't':-1})
+        _output.append({'name': name, 'message': res})
+    if len(_output) == 0:
+        _output.append({'name' : snode['name'], 'message': "Error:All child services are inaccessible!"})
     return json.dumps(_output)
 
 def html_response(snode):
@@ -291,8 +260,10 @@ def html_response(snode):
     <head>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     </head>

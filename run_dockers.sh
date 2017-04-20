@@ -22,3 +22,5 @@ do
     echo "started service ${serv}"
     sleep 1
 done
+
+
