@@ -251,7 +251,7 @@ def raw_service_output(snode, nodescend=False):
             bad = 1
         else :
             bad = 0
-            time.sleep(5)
+            time.sleep(2)
             _output.append({'name':'serviceDB2', 'message': "bad node", 't': -1})
             return _output
 #############################################
@@ -273,7 +273,7 @@ def raw_service_output(snode, nodescend=False):
         try:
             inst = sd.get_instance(s['name'])
             url = inst+s['path']
-            res = json.loads(urllib2.urlopen(url, timeout = 5).read())
+            res = json.loads(urllib2.urlopen(url, timeout = 1.6).read())
             t2 = time.time()
             _output.append({'name': name, 'message': res, 't': t2 - t})
         except Exception as e:
