@@ -21,7 +21,7 @@ my_instance_id = None
 myname = None
 
 bad = 0
-badlv = 0.4
+badlv = 0.6
 
 ##schema for microservice
 ##{name : service_name
@@ -44,24 +44,7 @@ serviceDB3 = {
     "path" : "/bottle/all/view/DB/serviceDB3",
     "children" : []
 }
-'''
-###############DB###########################
-serviceDB1 = {
-    "name" : "serviceDB1",
-    "path" : "/bottle/all/view/serviceA/serviceA1/serviceDB1",
-    "children" : []
-}
-serviceDB2 = {
-    "name" : "serviceDB2",
-    "path" : "/bottle/all/view/serviceC/serviceC3/serviceDB2",
-    "children" : []
-}
-serviceDB3 = {
-    "name" : "serviceDB3",
-    "path" : "/bottle/all/view/serviceB/serviceB3/serviceDB3",
-    "children" : []
-}
-'''
+
 ################ASYNC##########################
 serviceAsync1 = {
     "name" : "serviceAsync1",
@@ -88,8 +71,8 @@ serviceA1 = {
 serviceA2 = {
     "name" : "serviceA2",
     "path" : "/bottle/all/view/serviceA/serviceA2",
-    "children" : [serviceDB3]
     #"children" : [serviceDB2]
+    "children" : [serviceDB2]
 }
 serviceA3 = {
     "name" : "serviceA3",
@@ -120,8 +103,8 @@ serviceB3 = {
 serviceC1 = {
     "name" : "serviceC1",
     "path" : "/bottle/all/view/serviceC/serviceC1",
-    "children" : [serviceDB1]
-    #"children" : [serviceDB2]
+    #"children" : [serviceDB1]
+    "children" : [serviceDB2]
 }
 serviceC2 = {
     "name" : "serviceC2",
@@ -260,9 +243,7 @@ def index():
 
 def raw_service_output(snode, nodescend=False):
     global bad, badlv
-    _output = []	
-
-    '''
+###############################################
     if snode['name'] == "serviceDB2":
         a = random.random()
         print (a)
@@ -270,22 +251,17 @@ def raw_service_output(snode, nodescend=False):
             bad = 1
         else :
             bad = 0
-            time.sleep(5)
+            time.sleep(2)
             _output.append({'name':'serviceDB2', 'message': "bad node", 't': -1})
-            #return _output
-    '''
+            return _output
+#############################################
+    _output = []
     
     if nodescend == True or (len(snode['children']) == 0):
         t = time.time()
         time.sleep(0.0001)
         t1 = time.time()
-        a = random.random()
-        #if snode['name'] == "serviceDB2":
-        if snode['name'] == "serviceDB2" and a < badlv:
-            time.sleep(3)
-            _output.append({'name':'serviceDB2', 'message': "bad node", 't': -1})
-        else:    
-            _output.append({'name': snode['name'], 'message': "Hello World!", 't' :str(time.time() - t)})
+        _output.append({'name': snode['name'], 'message': "Hello World!", 't' :str(t1 - t)})
         return json.dumps(_output)
 
 
@@ -293,30 +269,20 @@ def raw_service_output(snode, nodescend=False):
         t = time.time()
         time.sleep(0.0001)
         name = s['name']
-        flag = 0
+       
         try:
             inst = sd.get_instance(s['name'])
             url = inst+s['path']
-            db = ['serviceDB1', 'serviceDB2', 'serviceDB3']
-            
-            #    raise Exception
-            res = json.loads(urllib2.urlopen(url, timeout = 1.3).read())
+            res = json.loads(urllib2.urlopen(url, timeout = 1.6).read())
             t2 = time.time()
             _output.append({'name': name, 'message': res, 't': t2 - t})
         except Exception as e:
         
-            res = -1
-            flag = 1
-            #if s['name'] == "serviceC3":
-            #    res = -3
-            _output.append({'name':'serviceC3', 'message':"bad node", 't': res})
-            _output.append({'name':'serviceC', 'message':"bad node", 't': res})
-            _output.append({'name':'serviceDB2', 'message':"bad node", 't': res})
-            #_output.append({'name': name, 'message': res, 't': res})
-            #raw_service_output(s)
+            res = str(e)
+            _output.append({'name':name, 'message':"bad " +  res, 't': -1})
+       
     #if len(_output) == 0:
     #   _output.append({'name' : snode['name'], 'message': "Error:All child services are inaccessible!", 't':-1})
-            
     return json.dumps(_output)
 
 def html_response(snode):
@@ -365,26 +331,11 @@ def level1(name='serviceA'):
 @route('/bottle/all/view/DB/<name>')
 @route('/bottle/all/view/async/<name>')
 @route('/bottle/all/auth/serviceD/<name>')
-
 def level2(name='serviceA1'):
     global service_dict
     #stderr("level2:received %s\n" % name)
     snode = service_dict[name]
     return raw_service_output(snode)
-
-@route('bottle/all/view/serviceA/serviceA1/<name>')
-@route('bottle/all/view/serviceA/serviceA2/<name>')
-@route('bottle/all/view/serviceA/serviceA3/<name>')
-@route('bottle/all/view/serviceB/serviceB1/<name>')
-@route('bottle/all/view/serviceC/serviceC1/<name>')
-@route('bottle/all/view/serviceB/serviceB2/<name>')
-@route('bottle/all/view/serviceB/serviceB3/<name>')
-@route('bottle/all/view/serviceC/serviceC3/<name>')
-@route('bottle/all/view/serviceC/serviceC2/<name>')
-def level3(name='serviceDB2'):
-    global service_dict
-    snode = service_d[name]
-    return raw_service_output[snode]
 
 if __name__ == '__main__':
     # To run the server, type-in $ python server.py
